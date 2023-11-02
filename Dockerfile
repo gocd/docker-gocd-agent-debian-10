@@ -21,31 +21,31 @@ FROM curlimages/curl:latest as gocd-agent-unzip
 USER root
 ARG TARGETARCH
 ARG UID=1000
-RUN curl --fail --location --silent --show-error "https://download.gocd.org/binaries/23.3.0-16991/generic/go-agent-23.3.0-16991.zip" > /tmp/go-agent-23.3.0-16991.zip && \
-    unzip -q /tmp/go-agent-23.3.0-16991.zip -d / && \
+RUN curl --fail --location --silent --show-error "https://download.gocd.org/binaries/23.4.0-17731/generic/go-agent-23.4.0-17731.zip" > /tmp/go-agent-23.4.0-17731.zip && \
+    unzip -q /tmp/go-agent-23.4.0-17731.zip -d / && \
     mkdir -p /go-agent/wrapper /go-agent/bin && \
-    mv -v /go-agent-23.3.0/LICENSE /go-agent/LICENSE && \
-    mv -v /go-agent-23.3.0/*.md /go-agent && \
-    mv -v /go-agent-23.3.0/bin/go-agent /go-agent/bin/go-agent && \
-    mv -v /go-agent-23.3.0/lib /go-agent/lib && \
-    mv -v /go-agent-23.3.0/logs /go-agent/logs && \
-    mv -v /go-agent-23.3.0/run /go-agent/run && \
-    mv -v /go-agent-23.3.0/wrapper-config /go-agent/wrapper-config && \
+    mv -v /go-agent-23.4.0/LICENSE /go-agent/LICENSE && \
+    mv -v /go-agent-23.4.0/*.md /go-agent && \
+    mv -v /go-agent-23.4.0/bin/go-agent /go-agent/bin/go-agent && \
+    mv -v /go-agent-23.4.0/lib /go-agent/lib && \
+    mv -v /go-agent-23.4.0/logs /go-agent/logs && \
+    mv -v /go-agent-23.4.0/run /go-agent/run && \
+    mv -v /go-agent-23.4.0/wrapper-config /go-agent/wrapper-config && \
     WRAPPERARCH=$(if [ $TARGETARCH == amd64 ]; then echo x86-64; elif [ $TARGETARCH == arm64 ]; then echo arm-64; else echo $TARGETARCH is unknown!; exit 1; fi) && \
-    mv -v /go-agent-23.3.0/wrapper/wrapper-linux-$WRAPPERARCH* /go-agent/wrapper/ && \
-    mv -v /go-agent-23.3.0/wrapper/libwrapper-linux-$WRAPPERARCH* /go-agent/wrapper/ && \
-    mv -v /go-agent-23.3.0/wrapper/wrapper.jar /go-agent/wrapper/ && \
+    mv -v /go-agent-23.4.0/wrapper/wrapper-linux-$WRAPPERARCH* /go-agent/wrapper/ && \
+    mv -v /go-agent-23.4.0/wrapper/libwrapper-linux-$WRAPPERARCH* /go-agent/wrapper/ && \
+    mv -v /go-agent-23.4.0/wrapper/wrapper.jar /go-agent/wrapper/ && \
     chown -R ${UID}:0 /go-agent && chmod -R g=u /go-agent
 
 FROM docker.io/debian:buster-slim
 ARG TARGETARCH
 
-LABEL gocd.version="23.3.0" \
+LABEL gocd.version="23.4.0" \
   description="GoCD agent based on docker.io/debian:buster-slim" \
   maintainer="GoCD Team <go-cd-dev@googlegroups.com>" \
   url="https://www.gocd.org" \
-  gocd.full.version="23.3.0-16991" \
-  gocd.git.sha="f38981e8aa684d63ac96f517996cd888eff37640"
+  gocd.full.version="23.4.0-17731" \
+  gocd.git.sha="4deb96d823b921419680560be080588e900d406e"
 
 ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-static-${TARGETARCH} /usr/local/sbin/tini
 
@@ -64,11 +64,11 @@ RUN \
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
   useradd -l -u ${UID} -g root -d /home/go -m go && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y git-core subversion mercurial openssh-client bash unzip curl ca-certificates locales procps sysvinit-utils coreutils && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y git-core openssh-client bash unzip curl ca-certificates locales procps coreutils && \
   DEBIAN_FRONTEND=noninteractive apt-get clean all && \
   rm -rf /var/lib/apt/lists/* && \
   echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen && /usr/sbin/locale-gen && \
-  curl --fail --location --silent --show-error "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.8%2B7/OpenJDK17U-jre_$(uname -m | sed -e s/86_//g)_linux_hotspot_17.0.8_7.tar.gz" --output /tmp/jre.tar.gz && \
+  curl --fail --location --silent --show-error "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.9%2B9/OpenJDK17U-jre_$(uname -m | sed -e s/86_//g)_linux_hotspot_17.0.9_9.tar.gz" --output /tmp/jre.tar.gz && \
   mkdir -p /gocd-jre && \
   tar -xf /tmp/jre.tar.gz -C /gocd-jre --strip 1 && \
   rm -rf /tmp/jre.tar.gz && \
